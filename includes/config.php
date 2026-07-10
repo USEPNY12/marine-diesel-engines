@@ -10,8 +10,13 @@ define('DB_NAME', getenv('DB_NAME') ?: 'marine_engines_db');
 define('DB_USER', getenv('DB_USER') ?: 'marine_user');
 define('DB_PASS', getenv('DB_PASS') ?: 'MarineEngines2026!');
 
-// Site Configuration - Auto-detect URL
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+// Site Configuration - Auto-detect URL (handles Traefik/reverse proxy)
+$protocol = 'https'; // Always use HTTPS since we have SSL via Traefik
+if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+    $protocol = $_SERVER['HTTP_X_FORWARDED_PROTO'];
+} elseif (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+    $protocol = 'https';
+}
 $host = $_SERVER['HTTP_HOST'] ?? 'marinedieselremanengines.com';
 $detectedUrl = $protocol . '://' . $host;
 define('SITE_URL', $detectedUrl);
