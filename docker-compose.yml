@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - DB_HOST=mysql
+      - DB_NAME=marine_engines_db
+      - DB_USER=marine_user
+      - DB_PASS=MarineEngines2026!
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - uploads:/var/www/html/assets/uploads
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: MarineRoot2026!
+      MYSQL_DATABASE: marine_engines_db
+      MYSQL_USER: marine_user
+      MYSQL_PASSWORD: MarineEngines2026!
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./seed_data.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  uploads:
