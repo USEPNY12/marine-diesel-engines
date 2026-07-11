@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/includes/mailer.php';
 
 $success = false;
 $error = '';
@@ -26,6 +27,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $stmt = $pdo->prepare("INSERT INTO quotes (first_name, last_name, email, phone, company, vessel_name, vessel_type, vin, engine_model, engine_type, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([$firstName, $lastName, $email, $phone, $company, $vesselName, $vesselType, $vin, $engineModel, $engineType, $message]);
+        
+        // Send email notification
+        sendQuoteNotification([
+            'name' => $firstName . ' ' . $lastName,
+            'email' => $email,
+            'phone' => $phone,
+            'engine' => $engineModel,
+            'vin' => $vin,
+            'message' => "Company: $company | Vessel: $vesselName ($vesselType) | Engine Type: $engineType | Message: $message"
+        ]);
+        
         $success = true;
     }
 }

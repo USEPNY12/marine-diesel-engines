@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/includes/mailer.php';
 
 $success = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -11,6 +12,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($name && $email && $message) {
         $pdo->prepare("INSERT INTO contacts (name, email, phone, subject, message) VALUES (?,?,?,?,?)")
             ->execute([$name, $email, $phone, $subject, $message]);
+        
+        // Send email notification
+        sendContactNotification([
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'subject' => $subject,
+            'message' => $message
+        ]);
+        
         $success = true;
     }
 }
